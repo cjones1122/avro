@@ -33,6 +33,7 @@ import java.util.List;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class TestSchema {
@@ -65,6 +66,59 @@ public class TestSchema {
     } catch (AvroRuntimeException are) {
       assertTrue(are.getMessage().contains("Duplicate field field_name in record " + recordName));
     }
+  }
+
+  @Test
+  public void testSameRecordsSameNamesSucceed() {
+    String recName = "name";
+    Schema rec1 = Schema.createRecord(recName, "doc", "namespace", false);
+    List<Field> recFields = new ArrayList<>();
+    recFields.add(new Field("f1", Schema.create(Type.INT), null, null));
+    rec1.setFields(recFields);
+
+    Schema schema = Schema.createRecord("Schema", "doc", "namespace", false);
+    List<Field> schemaFields = new ArrayList<>();
+    schemaFields.add(new Field("ff1", rec1, null, null));
+    schemaFields.add(new Field("ff2", rec1, null, null));
+
+    schema.setFields(schemaFields);
+    Schema schemaParsed = new Schema.Parser().parse(schema.toString());
+    Assert.assertNotNull(schemaParsed); // If assertion is met, then no exception is thrown when parsing and test
+                                        // succeeds
+  }
+
+  // This currently fails - need to solve
+  @Test
+  public void testSameRecordSameNameSucceedBeingParsedTwice() {
+    String recName = "name";
+    Schema rec1 = Schema.createRecord(recName, "doc", "namespace", false);
+    List<Field> recFields = new ArrayList<>();
+    recFields.add(new Field("f1", Schema.create(Type.INT), null, null));
+    rec1.setFields(recFields);
+
+    Schema.Parser schemaParser = new Schema.Parser();
+    schemaParser.parse(rec1.toString());
+    Schema rec1Parsed = schemaParser.parse(rec1.toString());
+
+    Assert.assertNotNull(rec1Parsed); // If assertion is met, then no exception is thrown when parsing again and test
+                                      // succeeds
+  }
+
+  @Test(expected = SchemaParseException.class)
+  public void testDiffRecordsSameNamesFail() {
+    String recName = "name";
+    Schema rec1 = Schema.createRecord(recName, "doc", "namespace", false);
+    List<Field> recFields = new ArrayList<>();
+    recFields.add(new Field("f1", Schema.create(Type.INT), null, null));
+    rec1.setFields(recFields);
+
+    Schema schema = Schema.createRecord(recName, "doc", "namespace", false);
+    List<Field> schemaFields = new ArrayList<>();
+    schemaFields.add(new Field("ff1", rec1, null, null));
+    schemaFields.add(new Field("ff2", rec1, null, null));
+
+    schema.setFields(schemaFields);
+    new Schema.Parser().parse(schema.toString());
   }
 
   @Test

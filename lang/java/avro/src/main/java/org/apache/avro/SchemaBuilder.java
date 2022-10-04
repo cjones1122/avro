@@ -942,7 +942,7 @@ public class SchemaBuilder {
 
     private void put(Schema schema) {
       String fullName = schema.getFullName();
-      if (schemas.containsKey(fullName)) {
+      if (schemas.containsKey(fullName) && !schema.equals(schemas.get(fullName))) {
         throw new SchemaParseException("Can't redefine: " + fullName);
       }
       schemas.put(fullName, schema);

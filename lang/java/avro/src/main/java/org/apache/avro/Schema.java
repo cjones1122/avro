@@ -1582,7 +1582,7 @@ public abstract class Schema extends JsonProperties implements Serializable {
 
     @Override
     public Schema put(Name name, Schema schema) {
-      if (containsKey(name))
+      if (containsKey(name) && !schema.equals(get(name)))
         throw new SchemaParseException("Can't redefine: " + name);
       return super.put(name, schema);
     }

@@ -634,6 +634,13 @@ public class TestSchemaBuilder {
         .name("f1").type().enumeration("MyEnum").symbols("X", "Y").noDefault().endRecord();
   }
 
+  @Test
+  public void testSameEnumsSameNamesSucceed() {
+    Schema schema = SchemaBuilder.record("Rec").fields().name("f0").type().enumeration("MyEnum").symbols("X")
+        .noDefault().name("f1").type().enumeration("MyEnum").symbols("X").noDefault().endRecord();
+    Assert.assertNotNull(schema);
+  }
+
   @Test(expected = SchemaParseException.class)
   public void testNamesFailAbsent() {
     SchemaBuilder.builder().type("notdefined");
